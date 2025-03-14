@@ -5,16 +5,15 @@ def rotate_left(value, shift, bit_size=16):
     return ((value << shift) | (value >> (bit_size - shift))) & (2**bit_size - 1)
 def rotate_right(value, shift, bit_size=16):
     return ((value >> shift) | (value << (bit_size - shift))) & (2**bit_size - 1)
-def F1(m2, m3):
-    m2_shifted = rotate_left(m2, 5)
-    return (m2_shifted ^ m3) % (2**16)
-def F2(m0, m1):
-    m0_not = ~m0 & (2**16 - 1)
-    m1_not_shifted = rotate_right(~m1 & (2**16 - 1), 12)
-    return m0_not ^ m1_not_shifted
-def generate_round_key(K5_64, i):
-    shift_amount = 2 * i + 1
-    shifted_key = K5_64 >> shift_amount
+def F(x0, x1, x2):
+    not_x0 = (~x0)
+    x0_x1 = not_x0 ^ (x1.rotate_left(x1, 5)) %  (2**16)
+    x0_x1_x2 = x0_x1 & x2.rotate_right(x2, 9)
+    return x0_x1_x2
+def generate_round_key(K_64, i):
+    first_shift = i * 5
+    second_shift  = i * 2
+    shifted_key = K_64 >> first_shift
     lower_32 = shifted_key & (2**32 - 1)
     upper_32 = (shifted_key >> 32) & (2**32 - 1)
     xor_result = lower_32 ^ upper_32
