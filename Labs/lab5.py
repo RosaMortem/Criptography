@@ -58,14 +58,17 @@ def rsa_decrypt_given_public_key(ciphertext, e, n):
     ]
 
     message_blocks = [pow(c, d, n) for c in cipher_blocks]
+    message = ''
+    for m in message_blocks:
+        for i in range(0, len(str(m)), 2):
+            message += ''.join(''.join(chr(int(str(m)[i:i+2]))))
 
-    message = ''.join(''.join(chr(int(str(m)[i:i+2])) for i in range(0, len(str(m)), 2)) for m in message_blocks)
 
     return message
 
 # Задача 5.1: Генерация ключей и шифрование/расшифрование
 public_key, private_key = generate_keys(bits=64)
-message = "HELLO RSA"
+message = "I Love This World"
 print("Оригинальное сообщение:", message)
 
 ciphertext = rsa_encrypt(message, public_key)
@@ -75,9 +78,9 @@ plaintext = rsa_decrypt(ciphertext, private_key)
 print("Расшифрованное сообщение:", plaintext)
 
 # Задача 5.2: Расшифровка с использованием публичного ключа
-n = 274611845366113
-e = 23311
-ciphertext = 108230462382949240744446393133139920760825242128635453394626156290136879344
+n = 775975524244507
+e = 92737
+ciphertext = 1654779743873183751353006385094746930962016872987156778877162905951074293158614643211676
 
 message_decoded = rsa_decrypt_given_public_key(ciphertext, e, n)
 print("Расшифрованное сообщение из задачи 4.2:", message_decoded)
