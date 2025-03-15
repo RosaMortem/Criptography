@@ -4,34 +4,33 @@ import time
 
 def rotate_left(value, shift, bit_size=16):
     return ((value << shift) | (value >> (bit_size - shift))) & (2**bit_size - 1)
-
 def rotate_right(value, shift, bit_size=16):
     return ((value >> shift) | (value << (bit_size - shift))) & (2**bit_size - 1)
-
-def F1(m2, m3):
-    return rotate_left(m2, 5) ^ m3
-
-def F2(m0, m1):
-    m0_not = ~m0 & (2**16 - 1)
-    m1_rotated = rotate_right(~m1 & (2**16 - 1), 12)
-    return m0_not ^ m1_rotated
-
-def generate_round_key(key, round_num):
-    return (rotate_left(key, round_num * 3) ^ rotate_right(key, round_num)) & (2**16 - 1)
-
-def feistel_round(m0, m1, m2, m3, key, round_num):
-    round_key = generate_round_key(key, round_num)
-    m0_new = m0 ^ round_key ^ F1(m2, m3)
-    m1_new = m1 ^ round_key ^ F2(m0, m1)
-    m2_new = m2 ^ (round_key >> 3)
-    m3_new = m3 ^ (round_key >> 3)
-    return m0_new, m1_new, m2_new, m3_new
-
+def F(x0, x1, x2):
+    not_x0 = (~x0)
+    x0_x1 = not_x0 ^ (rotate_left(x1, 5)) %  (2**16)
+    x0_x1_x2 = x0_x1 & rotate_right(x2, 9)
+    return x0_x1_x2
+def generate_round_key(K_64, i):
+    shift_1 = i * 5
+    shift_2  = i * 2
+    shifted_key1 = K_64 << shift_1
+    shifted_key2 = K_64 >> shift_2
+    res = (shifted_key1 ^ shifted_key2) & (2**16 - 1)
+    return res
+def feistel_round(x0, x1, x2, x3, key, round_num):
+    k_i = generate_round_key(key, round_num)
+    F_result = F(x0, x1, x2)
+    new_x0 = x3 ^ F_result
+    new_x1 = x0
+    new_x2 = x1 ^ k_i
+    new_x3 = x2 ^ x3
+    return new_x0, new_x1, new_x2, new_x3
 def feistel_encrypt_block(block, key, rounds):
-    m0, m1, m2, m3 = block
+    x0, x1, x2, x3 = block
     for i in range(rounds):
-        m0, m1, m2, m3 = feistel_round(m0, m1, m2, m3, key, i)
-    return m0, m1, m2, m3
+        x0, x1, x2, x3 = feistel_round(x0, x1, x2, x3, key, i)
+    return x0, x1, x2, x3
 
 def hash_feistel(blocks, key, iv, rounds=4):
     feedback = tuple(a ^ b for a, b in zip(iv, blocks[0]))
@@ -83,7 +82,7 @@ def generate_salt(length=8):
     return bytes(random.randint(0, 255) for _ in range(length))
 
 def main():
-    password = b"Qwerty123"
+    password = b"My 1! password"
     salt = generate_salt()
     iterations = 1000
     dk_len = 32
