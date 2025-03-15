@@ -2,7 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-initial_values = np.random.randint(0, 2**32, size=89)
+initial_values = np.random.randint(0, 2**32, size=89, dtype = 'int64')
 x = list(initial_values)
 
 m = 2**32
@@ -10,7 +10,7 @@ m = 2**32
 def additive_generator(length):
     results = []
     for i in range(length):
-        x_next = (x[-38] + x[-89]) % m
+        x_next = (x[-19] + x[-58]) % m
         x.append(x_next)
         results.append(x_next)
         x.pop(0)
